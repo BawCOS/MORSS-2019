@@ -8,3 +8,5 @@ Description: This site contains the powerpoint slides and associated materials u
 **Semmelweis History.pdf** is a recent paper on the Semmelweis story
 
 **Stories-Rule-The-World_How-to-Tell-a-Better-Story-with-Data good.pdf** is a document on storytelling with data and contains material on Semmelweis.
+
+**Powerpoint** - we have included our powerpoint slide deck.
