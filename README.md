@@ -10,3 +10,5 @@ Description: This site contains the powerpoint slides and associated materials u
 **Stories-Rule-The-World_How-to-Tell-a-Better-Story-with-Data good.pdf** is a document on storytelling with data and contains material on Semmelweis.
 
 **Powerpoint** - we have included our powerpoint slide deck.
+
+**Visual-vocabulary.pdf** This is a slide from the financial times on how to select a visual for your problem.
