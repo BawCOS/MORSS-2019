@@ -12,3 +12,7 @@ Description: This site contains the powerpoint slides and associated materials u
 **Powerpoint** - we have included our powerpoint slide deck.
 
 **Visual-vocabulary.pdf** This is a slide from the financial times on how to select a visual for your problem.
+
+**MORS_2019_Warner.html** This is a knited R markdown file of the slides for my talk on Teaching Data Science.
+
+**MORS_2019_Warner.Rpres** This is the text file of R code and markdown for the presentation on Teaching Data Science.
