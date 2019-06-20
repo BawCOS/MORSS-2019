@@ -1,0 +1,369 @@
+Teaching Data Science
+========================================================
+author: Bradley Warner
+date: June 20, 2019
+autosize: true
+
+What is the Big Deal with Data Science?
+========================================================
+incremental: true 
+
+- Not New
+- Definition - What could possibly make anyone happy?
+- Data Science Key Elements:
+  + Question and Data
+  + Computation - Mathematics Balance
+  + Communication
+
+
+
+Sir Francis Galton - Is Eminence Inherited?
+========================================================
+left: 30%
+
+![*Data Scientist*](Galton.jpg) 
+
+
+
+***
+
+![](Notes.jpg)
+
+
+
+Heights Data - Tidy Data
+========================================================
+
+```{r echo=FALSE}
+# Get Data
+library(mosaicData)
+
+# Load Packages that I need
+library(tidyverse)
+library(ggthemes)
+```
+
+```{r}
+head(Galton)
+```
+
+Grammars - Hadley Wickham
+========================================================
+
+![*Hadley Wickham*](Hadley.jpg) 
+
+***
+
+>*Statistics is a part of data science, not the whole thing. Statistics research focuses on data collection and modelling, and there is little work on developing good questions, thinking about the shape of data, communicating results or building data products.*
+
+Tidy Data - Fathers and Mothers
+========================================================
+
+```{r, echo=FALSE}
+Galton %>% 
+  select(family,father,mother) %>%
+  group_by(family) %>%
+  summarise(Father=father[1],Mother=mother[1]) %>%
+  select(Father,Mother) 
+```
+
+***
+
+```{r, echo=FALSE}
+Galton %>% 
+  select(family,father,mother) %>%
+  group_by(family) %>%
+  summarise(Father=father[1],Mother=mother[1]) %>%
+  select(Father,Mother)%>% 
+  gather(Parent,Height)
+```
+
+Questions about Parents
+========================================================
+
+```{r}
+Galton %>% 
+  select(family,father,mother) %>%
+  group_by(family) %>%
+  summarise(Father=father[1],Mother=mother[1]) %>%
+  select(Father,Mother) %>%
+  summary()
+```
+
+
+Questions about Parents - Code 
+========================================================
+
+```
+Galton %>% 
+  select(family,father,mother) %>%
+  group_by(family) %>%
+  summarise(Father=father[1],Mother=mother[1]) %>%
+  select(Father,Mother) %>%
+  summary()
+```
+
+```
+summary(select(summarise(group_by(
+select(Galton,family,father,mother),family),
+Father=father[1],Mother=mother[1]),Father,Mother))
+```
+
+
+
+Explore Data - Fathers and Mothers
+========================================================
+
+```{r, echo=FALSE,fig.align='center'}
+Galton %>% 
+  select(family,father,mother) %>%
+  group_by(family) %>%
+  summarise(Father=father[1],Mother=mother[1]) %>%
+  select(Father,Mother) %>% 
+  gather(Parent,Height)%>% 
+  ggplot(aes(x=Parent,y=Height)) +
+  geom_boxplot() +
+  geom_violin(fill="lightblue",alpha=0.5) +
+  labs(title="Galton's Height Data") +
+  geom_jitter(position = position_jitter(width=.05)) +
+  theme_economist_white()
+```
+
+
+Code for Previous Slide
+========================================================
+
+#### Scalfolding for Teaching
+
+```{r, eval=FALSE}
+Galton %>% 
+  select(family,father, ...) %>%
+  group_by(family) %>%
+  summarise(Father=father[1],Mother=...) %>%
+  select(Father,Mother) %>% 
+  gather(Parent,...) %>%
+  ggplot(aes(x=Parent,y=...)) +
+  geom_boxplot() +
+  geom_violin(fill="...",alpha=0.5) +
+  labs(title="Galton's Height Data") +
+  geom_jitter(position = position_jitter(width=.05)) +
+  theme_classic()
+```
+
+The Future of Data Analysis - Tukey 1962
+========================================================
+left: 30%
+
+![John Tukey](Tukey2.jpeg)  
+
+***
+
+>*Teaching data analysis is not easy, and the time allowed is always far from sufficient. But these difficulties have been enhanced by the view that "avoidance of cookbookery" and growth of understanding come only by mathematical treatment, with emphasis upon proofs. The problem of cookbookery is not peculiar to data analysis. But the solution of concentrating upon mathematics and proof is.*
+
+
+Modern Visualization
+========================================================
+
+```{r echo=FALSE}
+Galton %>% mutate(Mid_Parent = (father + 1.08 * mother)/2, Child = ifelse(sex=='M',height,1.08*height)) -> my_Galton
+```
+
+```{r echo=FALSE,fig.align='center'}
+# Plot of father's height versus child
+my_Galton %>% select(Mid_Parent, sex,Child) %>% 
+  ggplot(aes(x=Mid_Parent,y=Child,color=sex)) +
+  geom_point() +
+  geom_abline(slope=1,intercept=0) +
+  labs(x="Mid-Parent Height",y="Child's Height",title="Galton's Data") +
+  scale_colour_brewer(palette = "Set1") +
+  theme_classic()
+```
+
+
+Two Cultures - Leo Breiman 2001
+========================================================
+incremental: true 
+
+![](Breiman.jpeg)
+
+****
+Two goals in Analyzing Data:
+- Prediction: 2%
+- Inference: 98%
+
+Prediction
+========================================================
+
+#### Simple prediction
+
+```{r echo=FALSE}
+my_Galton %>% filter(Mid_Parent==72.06) %>%
+  select(family,Mid_Parent,sex,Child)
+```
+
+```{r echo=FALSE}
+my_Galton %>% filter(Mid_Parent==72.06) %>% summarize(prediction=median(Child))
+```
+
+
+Visual Summary
+========================================================
+
+```{r, echo=FALSE}
+basic_predict <- function(in_height=70,window=.5,data=my_Galton){
+  data %>% 
+    filter(Mid_Parent>in_height-window,Mid_Parent<in_height+window) %>% 
+    summarize(prediction=median(Child)) %>% 
+    as.numeric()
+}
+```
+
+```{r echo=FALSE}
+predictions <- data.frame(x=seq(64,74,.5),y=sapply(seq(64,74,.5), basic_predict,window=1.5))
+predictions2 <- data.frame(x=seq(64,74,.5),y=sapply(seq(64,74,.5), basic_predict,window=15))
+```
+
+
+```{r echo=FALSE, fig.align='center'}
+# Plot of father's height versus child
+my_Galton %>% select(Mid_Parent, sex,Child) %>% 
+  ggplot(aes(x=Mid_Parent,y=Child)) +
+  geom_point(alpha=.1) +
+  geom_abline(slope=1,intercept=0) +
+  geom_point(data=predictions,aes(x=x,y=y),color='red')+
+  geom_point(data=predictions2,aes(x=x,y=y),color="blue")+
+  labs(x="Mid-Parent Height",y="Child's Height",title="Galton's Data") +
+  scale_colour_brewer(palette = "Pastel1") +
+  theme_classic()
+```
+
+Tuning Hyperparameters 
+========================================================
+Intuition about:
+ - Loss function
+ - Cross-validation
+ - Bias-Variance Tradeoff
+ 
+ *** 
+ 
+ Window | Predictive Error
+------------- | -------------
+0.15 | 5.23
+0.25 | 5.08
+0.5 | 5.01
+1.5 | 5.06
+3 | 5.41
+5 | 6.18
+10 | 6.74
+15 | 6.74
+
+
+Typical Approach Using College Stats
+========================================================
+
+```{r}
+summary(lm(height~father+mother+sex,data=Galton))
+```
+
+Visual Summary - With Regression Line
+========================================================
+
+```{r echo=FALSE,fig.align='center'}
+# Plot of father's height versus child
+my_Galton %>% select(Mid_Parent, sex,Child) %>% 
+  ggplot(aes(x=Mid_Parent,y=Child)) +
+  geom_point(alpha=.1) +
+  geom_abline(slope=1,intercept=0) +
+  geom_point(data=predictions,aes(x=x,y=y),color='red')+
+  geom_point(data=predictions2,aes(x=x,y=y),color="blue")+
+  geom_smooth(method="lm",se=FALSE) +
+  labs(x="Mid-Parent Height",y="Child's Height",title="Galton's Data") +
+  scale_colour_brewer(palette = "Pastel1") +
+  theme_classic()
+```
+
+Resampling and Permutations - Slopes
+========================================================
+
+```{r echo=FALSE}
+library(broom)
+library(rsample)
+```
+
+```{r echo=FALSE}
+set.seed(3)
+Galton_boot <- my_Galton %>% select(Mid_Parent,Child) %>% bootstraps(times=1000)
+
+my_lm <- function(split){
+  lm(Child~Mid_Parent,data=analysis(split))
+}
+
+boot_models <- Galton_boot %>% mutate(model=map(splits,my_lm),coefs=map(model,tidy))
+
+boot_coefs <- boot_models %>% unnest(coefs)
+```
+
+```{r,echo=FALSE,fig.align='center'}
+boot_coefs %>% filter(term=="Mid_Parent") %>%
+ggplot(aes(estimate)) +
+  geom_density(bins = 10) +
+  labs(x="Slope",title="Distribution of Slopes") +
+  theme_economist_white()
+```
+
+
+Teaching Data Science
+========================================================
+
+- Previous courses:
+  + 40 Lessons on probability
+  + 40 Lessons on small sample normal-based inference
+
+***
+   
+- New Courses:
+  + Visualization
+  + Reduce Mathematical Infrastructure
+  + Resampling: Intuition
+  + Data Wrangling
+  + Reproducible Research
+  + Prediction: Machine Learning
+  + Alternative Data: Images, Text, Web
+  + Cloud based computing
+  + Portfolios
+  + Data 8 - Hybrid
+  
+
+David Donoho - Secret Sauce
+========================================================   
+
+Common Task Framework (CTF). 
+
+- A publicly available training data set 
+
+- A set of enrolled competitors whose common task is to
+infer a class prediction rule from the training data.
+
+- A scoring referee, to which competitors can submit their
+prediction rule. 
+
+[Kaggle](https://www.kaggle.com/kaggle/kaggle-survey-2018/kernels?sortBy=hotness&group=everyone&pageSize=20&datasetId=70947)
+
+Ideas - Data Science for All
+======================================================== 
+
+Data Science:
+- Reduce mathematical barriers: more students
+- Start early
+- Gain intuition
+- Develop computation skills
+- Communication via visualizations and reproducible research
+- Introduce math when needed
+
+Finally
+======================================================== 
+
+>*As a field, statistics tends to lean towards abstinence based outreach, only do statistics in a committed long-term relationship with a professional statistician ...*
+
+
+>*Rather than stigmatizing amateur statisticians, we should be doing our best to provide tools to make it safe.*   - Hadley Wickham
